@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UserRepository } from './user.repository';
@@ -43,5 +43,16 @@ export class UsersService {
 
  async remove(_id: string) {
     return this.userRepository.findAndDelete({ _id });
+  }
+
+  async verifyUser(email : string, password : string){
+    const user = await this.userRepository.findOne({email});
+    const passordIsValid = await bcrypt.compare(password, user.password);
+
+    if(!passordIsValid){
+      throw new UnauthorizedException('Credential are not valid.');
+    }
+
+    return user;
   }
 }
